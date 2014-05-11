@@ -4,6 +4,8 @@
  * By Alain Gonzalez (http://web-argument.com)
  * Copyright (c) 2011 Alain Gonzalez 
  * Licensed under the MIT License: http://www.opensource.org/licenses/mit-license.php
+ *
+ * Added Submenus by Marco TrŠger (https://github.com/traeger/jquery-accordion-image-menu)
 */
 
 (function( $ ){
@@ -33,24 +35,47 @@
 					else 
 						$(this).animate({'width':itemDim},_this.menuSettings.duration,_this.menuSettings.effect);
 						
-					var title = $('span',this);
+					var title = $('span',this).not('.submenucontainer span',this);
+          var subcontainer = $('.submenucontainer',this)
 					
 					title.stop(true,false);
+          subcontainer.stop(true,false);
 					
 					if (_this.menuSettings.fadeInTitle != null && title.length > 0) {
 						if (itemDim == _this.menuSettings.openDim) {
 							if (_this.menuSettings.fadeInTitle) title.animate({'opacity':0.7});
-							else title.animate({'opacity':0});		
+							else title.animate({'opacity':0});
 						} else {
 							if (_this.menuSettings.fadeInTitle) title.animate({'opacity':0});
 							else title.animate({'opacity':0.7});
 						}
-					}						
+					}
+          if (itemDim == _this.menuSettings.openDim) {
+            subcontainer.animate({'opacity':1});
+          } else {
+            subcontainer.animate({'opacity':0});
+          }
 				});		
 			
 			}
 
-			var $this = $('a',obj);
+			var $this = $('a, li', obj).filter(function() {
+        if($(this).is("a")) {
+          return $(this).closest('.children').length == 0
+              && $(this).parent().find('.children').length == 0
+        }
+        else {
+          return $(this).closest('.children').length == 0
+              && $(this).find('.children').length > 0
+        }
+        return false;
+      });
+      $this.each(function() {
+        if($(this).is("li")) {
+          $(this).addClass('submenu')
+          $('.children', this).wrap('<div class="submenucontainer"></div>')
+        }
+      })
 			
 			_this.menuAnimate($this);
 			
@@ -84,7 +109,7 @@
 				if ( i == ($this.length-1)) {
 					borderBottomValue = 0;
 					borderRightValue = 0;
-				} 
+				}
 							
 				$(this).css({
 							'width': aWidth,
@@ -98,7 +123,10 @@
 								$this.stop(true,false);
 								_this.menuAnimate($this,i);
 							});	
-			
+			  $('.submenucontainer',this).css({
+          'top': aHeight,
+          'width': _this.menuSettings.openDim,
+        })
 			});
 			
 			$(obj).mouseleave(function() {
